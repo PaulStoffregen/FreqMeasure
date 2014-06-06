@@ -24,7 +24,7 @@ void loop() {
     sum = sum + FreqMeasure.read();
     count = count + 1;
     if (count > 30) {
-      double frequency = F_CPU / (sum / count);
+      float frequency = FreqMeasure.countToFrequency(sum / count);
       lcd.setCursor(0, 1);
       lcd.print(frequency);
       lcd.print("       ");

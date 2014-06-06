@@ -2,7 +2,7 @@
  * http://www.pjrc.com/teensy/td_libs_FreqMeasure.html
  * Copyright (c) 2011 PJRC.COM, LLC - Paul Stoffregen <paul@pjrc.com>
  *
- * Version 1.0
+ * Version 1.1
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
  */
 
 #include "FreqMeasure.h"
-#include "util/capture.h"
+#include "util/FreqMeasureCapture.h"
 
 #define FREQMEASURE_BUFFER_LEN 12
 static volatile uint32_t buffer_value[FREQMEASURE_BUFFER_LEN];
@@ -69,11 +69,21 @@ uint32_t FreqMeasureClass::read(void)
 	return value;
 }
 
+float FreqMeasureClass::countToFrequency(uint32_t count)
+{
+#if defined(__AVR__)
+	return (float)F_CPU / (float)count;
+#elif defined(__arm__) && defined(TEENSYDUINO)
+	return (float)F_BUS / (float)count;
+#endif
+}
+
 void FreqMeasureClass::end(void)
 {
 	capture_shutdown();
 }
 
+#if defined(__AVR__)
 
 ISR(TIMER_OVERFLOW_VECTOR)
 {
@@ -110,6 +120,40 @@ ISR(TIMER_CAPTURE_VECTOR)
 	}
 }
 
+#elif defined(__arm__) && defined(TEENSYDUINO)
+
+void FTM_ISR_NAME (void)
+{
+	uint32_t capture, period, i;
+	bool inc = false;
+
+	if (capture_overflow()) {
+		capture_overflow_reset();
+		capture_msw++;
+		inc = true;
+	}
+	if (capture_event()) {
+		capture = capture_read();
+		if (capture <= 0xE000 || !inc) {
+			capture |= (capture_msw << 16);
+		} else {
+			capture |= ((capture_msw - 1) << 16);
+		}
+		// compute the waveform period
+		period = capture - capture_previous;
+		capture_previous = capture;
+		// store it into the buffer
+		i = buffer_head + 1;
+		if (i >= FREQMEASURE_BUFFER_LEN) i = 0;
+		if (i != buffer_tail) {
+			buffer_value[i] = period;
+			buffer_head = i;
+		}
+	}
+}
+
+
+#endif
 
 FreqMeasureClass FreqMeasure;
 
