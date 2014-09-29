@@ -139,7 +139,7 @@ static inline void capture_init(void)
 static inline void capture_start(void)
 {
 	FTM1_C1SC = 0b01000100;
-	CORE_PIN3_CONFIG = PORT_PCR_MUX(3);
+	CORE_PIN4_CONFIG = PORT_PCR_MUX(3);
 	NVIC_ENABLE_IRQ(IRQ_FTM1);
 }
 static inline uint16_t capture_event(void)
@@ -163,7 +163,7 @@ static inline void capture_overflow_reset(void)
 static inline void capture_shutdown(void)
 {
 	FTM1_C1SC = 0;
-	CORE_PIN3_CONFIG = 0;
+	CORE_PIN4_CONFIG = 0;
 	NVIC_DISABLE_IRQ(IRQ_FTM1);
 }
 
@@ -187,7 +187,7 @@ static inline void capture_init(void)
 static inline void capture_start(void)
 {
 	FTM2_C0SC = 0b01000100;
-	CORE_PIN3_CONFIG = PORT_PCR_MUX(3);
+	CORE_PIN32_CONFIG = PORT_PCR_MUX(3);
 	NVIC_ENABLE_IRQ(IRQ_FTM2);
 }
 static inline uint16_t capture_event(void)
@@ -211,7 +211,7 @@ static inline void capture_overflow_reset(void)
 static inline void capture_shutdown(void)
 {
 	FTM2_C0SC = 0;
-	CORE_PIN3_CONFIG = 0;
+	CORE_PIN32_CONFIG = 0;
 	NVIC_DISABLE_IRQ(IRQ_FTM2);
 }
 
@@ -235,7 +235,7 @@ static inline void capture_init(void)
 static inline void capture_start(void)
 {
 	FTM2_C1SC = 0b01000100;
-	CORE_PIN3_CONFIG = PORT_PCR_MUX(3);
+	CORE_PIN25_CONFIG = PORT_PCR_MUX(3);
 	NVIC_ENABLE_IRQ(IRQ_FTM2);
 }
 static inline uint16_t capture_event(void)
@@ -259,7 +259,7 @@ static inline void capture_overflow_reset(void)
 static inline void capture_shutdown(void)
 {
 	FTM2_C1SC = 0;
-	CORE_PIN3_CONFIG = 0;
+	CORE_PIN25_CONFIG = 0;
 	NVIC_DISABLE_IRQ(IRQ_FTM2);
 }
 
