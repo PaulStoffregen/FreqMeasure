@@ -73,8 +73,10 @@ float FreqMeasureClass::countToFrequency(uint32_t count)
 {
 #if defined(__AVR__)
 	return (float)F_CPU / (float)count;
-#elif defined(__arm__) && defined(TEENSYDUINO)
+#elif defined(__arm__) && defined(TEENSYDUINO) && defined(KINETISK)
 	return (float)F_BUS / (float)count;
+#elif defined(__arm__) && defined(TEENSYDUINO) && defined(KINETISL)
+	return (float)(F_PLL/2) / (float)count;
 #endif
 }
 

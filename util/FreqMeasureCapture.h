@@ -30,15 +30,22 @@
 
 // Teensy 3.1
 #elif defined(__MK20DX256__)
-  #define CAPTURE_USE_FTM1_CH0     // FTM1 CH0 is pin 3
-  //#define CAPTURE_USE_FTM1_CH1   // FTM1 CH1 is pin 4
-  //#define CAPTURE_USE_FTM2_CH0   // FTM2 CH0 is pin 32
-  //#define CAPTURE_USE_FTM2_CH1   // FTM2 CH1 is pin 25
+  #define CAPTURE_USE_FTM1_CH0 3    // FTM1 CH0 is pin 3
+  //#define CAPTURE_USE_FTM1_CH1 4  // FTM1 CH1 is pin 4
+  //#define CAPTURE_USE_FTM2_CH0 32 // FTM2 CH0 is pin 32
+  //#define CAPTURE_USE_FTM2_CH1 25 // FTM2 CH1 is pin 25
 
 // Teensy 3.0
 #elif defined(__MK20DX128__)
-  #define CAPTURE_USE_FTM1_CH0     // FTM1 CH0 is pin 3
-  //#define CAPTURE_USE_FTM1_CH1   // FTM1 CH1 is pin 4
+  #define CAPTURE_USE_FTM1_CH0 3    // FTM1 CH0 is pin 3
+  //#define CAPTURE_USE_FTM1_CH1 4  // FTM1 CH1 is pin 4
+
+// Teensy-LC
+#elif defined(__MKL26Z64__)
+  #define CAPTURE_USE_FTM1_CH0 16   // FTM1 CH0 is pin 16
+  //#define CAPTURE_USE_FTM1_CH1 17 // FTM1 CH1 is pin 17
+  //#define CAPTURE_USE_FTM2_CH0 3  // FTM2 CH0 is pin 3
+  //#define CAPTURE_USE_FTM2_CH1 4  // FTM2 CH1 is pin 4
 
 // Teensy 2.0
 #elif defined(__AVR_ATmega32U4__)
@@ -84,14 +91,20 @@ static inline void capture_init(void)
 		FTM1_CNT = 0;
 		FTM1_MOD = 0xFFFF;
 		FTM1_SC = FTM_SC_VALUE;
+		#ifdef KINETISK
 		FTM1_MODE = 0;
+		#endif
 	}
 	NVIC_SET_PRIORITY(IRQ_FTM1, 48);
 }
 static inline void capture_start(void)
 {
+	#if defined(KINETISL)
+	FTM1_C0SC = 0;
+	delayMicroseconds(1);
+	#endif
 	FTM1_C0SC = 0b01000100;
-	CORE_PIN3_CONFIG = PORT_PCR_MUX(3);
+	*portConfigRegister(CAPTURE_USE_FTM1_CH0) = PORT_PCR_MUX(3);
 	NVIC_ENABLE_IRQ(IRQ_FTM1);
 }
 static inline uint16_t capture_event(void)
@@ -101,7 +114,11 @@ static inline uint16_t capture_event(void)
 static inline uint32_t capture_read(void)
 {
 	uint32_t val = FTM1_C0V;
+	#if defined(KINETISK)
 	FTM1_C0SC = 0b01000100;
+	#elif defined(KINETISL)
+	FTM1_C0SC = 0b01000100 | FTM_CSC_CHF;
+	#endif
 	return val;
 }
 static inline uint8_t capture_overflow(void)
@@ -110,12 +127,16 @@ static inline uint8_t capture_overflow(void)
 }
 static inline void capture_overflow_reset(void)
 {
+	#if defined(KINETISK)
 	FTM1_SC = FTM_SC_VALUE;
+	#elif defined(KINETISL)
+	FTM1_SC = FTM_SC_VALUE | FTM_SC_TOF;
+	#endif
 }
 static inline void capture_shutdown(void)
 {
 	FTM1_C0SC = 0;
-	CORE_PIN3_CONFIG = 0;
+	*portConfigRegister(CAPTURE_USE_FTM1_CH0) = 0;
 	NVIC_DISABLE_IRQ(IRQ_FTM1);
 }
 
@@ -132,14 +153,20 @@ static inline void capture_init(void)
 		FTM1_CNT = 0;
 		FTM1_MOD = 0xFFFF;
 		FTM1_SC = FTM_SC_VALUE;
+		#ifdef KINETISK
 		FTM1_MODE = 0;
+		#endif
 	}
 	NVIC_SET_PRIORITY(IRQ_FTM1, 48);
 }
 static inline void capture_start(void)
 {
+	#if defined(KINETISL)
+	FTM1_C1SC = 0;
+	delayMicroseconds(1);
+	#endif
 	FTM1_C1SC = 0b01000100;
-	CORE_PIN4_CONFIG = PORT_PCR_MUX(3);
+	*portConfigRegister(CAPTURE_USE_FTM1_CH1) = PORT_PCR_MUX(3);
 	NVIC_ENABLE_IRQ(IRQ_FTM1);
 }
 static inline uint16_t capture_event(void)
@@ -149,7 +176,11 @@ static inline uint16_t capture_event(void)
 static inline uint32_t capture_read(void)
 {
 	uint32_t val = FTM1_C1V;
+	#if defined(KINETISK)
 	FTM1_C1SC = 0b01000100;
+	#elif defined(KINETISL)
+	FTM1_C1SC = 0b01000100 | FTM_CSC_CHF;
+	#endif
 	return val;
 }
 static inline uint8_t capture_overflow(void)
@@ -159,11 +190,16 @@ static inline uint8_t capture_overflow(void)
 static inline void capture_overflow_reset(void)
 {
 	FTM1_SC = FTM_SC_VALUE;
+	#if defined(KINETISK)
+	FTM1_SC = FTM_SC_VALUE;
+	#elif defined(KINETISL)
+	FTM1_SC = FTM_SC_VALUE | FTM_SC_TOF;
+	#endif
 }
 static inline void capture_shutdown(void)
 {
 	FTM1_C1SC = 0;
-	CORE_PIN4_CONFIG = 0;
+	*portConfigRegister(CAPTURE_USE_FTM1_CH1) = 0;
 	NVIC_DISABLE_IRQ(IRQ_FTM1);
 }
 
@@ -180,14 +216,20 @@ static inline void capture_init(void)
 		FTM2_CNT = 0;
 		FTM2_MOD = 0xFFFF;
 		FTM2_SC = FTM_SC_VALUE;
+		#ifdef KINETISK
 		FTM2_MODE = 0;
+		#endif
 	}
 	NVIC_SET_PRIORITY(IRQ_FTM2, 48);
 }
 static inline void capture_start(void)
 {
+	#if defined(KINETISL)
+	FTM2_C0SC = 0;
+	delayMicroseconds(1);
+	#endif
 	FTM2_C0SC = 0b01000100;
-	CORE_PIN32_CONFIG = PORT_PCR_MUX(3);
+	*portConfigRegister(CAPTURE_USE_FTM2_CH0) = PORT_PCR_MUX(3);
 	NVIC_ENABLE_IRQ(IRQ_FTM2);
 }
 static inline uint16_t capture_event(void)
@@ -197,7 +239,11 @@ static inline uint16_t capture_event(void)
 static inline uint32_t capture_read(void)
 {
 	uint32_t val = FTM2_C0V;
+	#if defined(KINETISK)
 	FTM2_C0SC = 0b01000100;
+	#elif defined(KINETISL)
+	FTM2_C0SC = 0b01000100 | FTM_CSC_CHF;
+	#endif
 	return val;
 }
 static inline uint8_t capture_overflow(void)
@@ -206,12 +252,16 @@ static inline uint8_t capture_overflow(void)
 }
 static inline void capture_overflow_reset(void)
 {
+	#if defined(KINETISK)
 	FTM2_SC = FTM_SC_VALUE;
+	#elif defined(KINETISL)
+	FTM2_SC = FTM_SC_VALUE | FTM_SC_TOF;
+	#endif
 }
 static inline void capture_shutdown(void)
 {
 	FTM2_C0SC = 0;
-	CORE_PIN32_CONFIG = 0;
+	*portConfigRegister(CAPTURE_USE_FTM2_CH0) = 0;
 	NVIC_DISABLE_IRQ(IRQ_FTM2);
 }
 
@@ -228,14 +278,20 @@ static inline void capture_init(void)
 		FTM2_CNT = 0;
 		FTM2_MOD = 0xFFFF;
 		FTM2_SC = FTM_SC_VALUE;
+		#ifdef KINETISK
 		FTM2_MODE = 0;
+		#endif
 	}
 	NVIC_SET_PRIORITY(IRQ_FTM2, 48);
 }
 static inline void capture_start(void)
 {
+	#if defined(KINETISL)
+	FTM2_C1SC = 0;
+	delayMicroseconds(1);
+	#endif
 	FTM2_C1SC = 0b01000100;
-	CORE_PIN25_CONFIG = PORT_PCR_MUX(3);
+	*portConfigRegister(CAPTURE_USE_FTM2_CH1) = PORT_PCR_MUX(3);
 	NVIC_ENABLE_IRQ(IRQ_FTM2);
 }
 static inline uint16_t capture_event(void)
@@ -245,7 +301,11 @@ static inline uint16_t capture_event(void)
 static inline uint32_t capture_read(void)
 {
 	uint32_t val = FTM2_C1V;
+	#if defined(KINETISK)
 	FTM2_C1SC = 0b01000100;
+	#elif defined(KINETISL)
+	FTM2_C1SC = 0b01000100 | FTM_CSC_CHF;
+	#endif
 	return val;
 }
 static inline uint8_t capture_overflow(void)
@@ -254,12 +314,16 @@ static inline uint8_t capture_overflow(void)
 }
 static inline void capture_overflow_reset(void)
 {
+	#if defined(KINETISK)
 	FTM2_SC = FTM_SC_VALUE;
+	#elif defined(KINETISL)
+	FTM2_SC = FTM_SC_VALUE | FTM_SC_TOF;
+	#endif
 }
 static inline void capture_shutdown(void)
 {
 	FTM2_C1SC = 0;
-	CORE_PIN25_CONFIG = 0;
+	*portConfigRegister(CAPTURE_USE_FTM2_CH1) = 0;
 	NVIC_DISABLE_IRQ(IRQ_FTM2);
 }
 
