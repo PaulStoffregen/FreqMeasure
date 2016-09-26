@@ -1,18 +1,23 @@
 {
-"name": "FreqMeasure",
-"frameworks": "Arduino",
-"keywords": "serial",
-"description": "Frequency measurement by elapsed period timing",
-"url": "http://www.pjrc.com/teensy/td_libs_FreqMeasure.html",
-"downloadUrl": "http://www.pjrc.com/teensy/arduino_libraries/FreqMeasure.zip",
-"authors":
-{
-        "name": "Paul Stoffregen",
-        "maintainer": true
-},
-"repository":
-{
-    "type": "git",
-    "url": "https://github.com/PaulStoffregen/FreqMeasure"
-}
+    "name": "FreqMeasure",
+    "description": "Frequency measurement by elapsed period timing",
+    "keywords": "frequency, measurement",
+    "authors": [
+        {
+            "name": "Paul Stoffregen",
+            "url": "https://www.pjrc.com/about/",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/PaulStoffregen/FreqMeasure"
+    },
+    "version": "1.2",
+    "downloadUrl": "http://www.pjrc.com/teensy/arduino_libraries/FreqMeasure.zip",
+    "homepage": "http://www.pjrc.com/teensy/td_libs_FreqMeasure.html",
+    "frameworks": "Arduino",
+    "examples": [
+        "examples/*/*.pde"
+    ]
 }
