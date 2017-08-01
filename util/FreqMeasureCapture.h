@@ -28,12 +28,14 @@
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
   #define CAPTURE_USE_TIMER1       // ICP1 is pin 8
 
-// Teensy 3.1
+// Teensy 3.1, 3.2, 3.5, 3.6
 #elif defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
   #define CAPTURE_USE_FTM1_CH0 3    // FTM1 CH0 is pin 3
   //#define CAPTURE_USE_FTM1_CH1 4  // FTM1 CH1 is pin 4
-  //#define CAPTURE_USE_FTM2_CH0 32 // FTM2 CH0 is pin 32
-  //#define CAPTURE_USE_FTM2_CH1 25 // FTM2 CH1 is pin 25
+  //#define CAPTURE_USE_FTM2_CH0 32 // FTM2 CH0 is pin 32 (Teensy 3.1 and 3.2)
+  //#define CAPTURE_USE_FTM2_CH1 25 // FTM2 CH1 is pin 25 (Teensy 3.1 and 3.2)
+  //#define CAPTURE_USE_FTM2_CH0 29 // FTM2 CH0 is pin 29 (Teensy 3.5 and 3.6)
+  //#define CAPTURE_USE_FTM2_CH1 30 // FTM2 CH1 is pin 30 (Teensy 3.5 and 3.6)
 
 // Teensy 3.0
 #elif defined(__MK20DX128__)
