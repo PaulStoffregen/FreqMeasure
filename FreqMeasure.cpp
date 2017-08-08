@@ -27,13 +27,23 @@
 #include "util/FreqMeasureCapture.h"
 
 #define FREQMEASURE_BUFFER_LEN 12
+
+#if defined(__AVR__)
+	#define OVERFLOW_IGNORE_TICKS 0xFF00
+#elif defined(__arm__) && defined(TEENSYDUINO)
+	#define OVERFLOW_IGNORE_TICKS 0xE000
+#endif
+ 
 static volatile uint32_t buffer_value[FREQMEASURE_BUFFER_LEN];
 static volatile uint8_t buffer_head;
 static volatile uint8_t buffer_tail;
 static uint16_t capture_msw;
 static uint32_t capture_previous;
+static uint16_t overflow_ignore_ticks = OVERFLOW_IGNORE_TICKS;
 
-
+void FreqMeasureClass::setOverflowIgnoreTicks(uint16_t ticks){
+	overflow_ignore_ticks = ticks;
+}
 void FreqMeasureClass::begin(void)
 {
 	capture_init();
@@ -105,7 +115,7 @@ ISR(TIMER_CAPTURE_VECTOR)
 	// while this ISR was starting up.  However, if we read a 16 bit number that
 	// is very close to overflow, then ignore any overflow since it probably
 	// just happened.
-	if (capture_overflow() && capture_lsw < 0xFF00) {
+	if (capture_overflow() && capture_lsw < overflow_ignore_ticks) {
 		capture_overflow_reset();
 		capture_msw++;
 	}
@@ -136,7 +146,7 @@ void FTM_ISR_NAME (void)
 	}
 	if (capture_event()) {
 		capture = capture_read();
-		if (capture <= 0xE000 || !inc) {
+		if (capture <= overflow_ignore_ticks || !inc) {
 			capture |= (capture_msw << 16);
 		} else {
 			capture |= ((capture_msw - 1) << 16);
