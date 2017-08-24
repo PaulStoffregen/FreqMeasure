@@ -9,6 +9,7 @@ public:
 	static uint8_t available(void);
 	static uint32_t read(void);
 	static float countToFrequency(uint32_t count);
+	static float countToNanoseconds(uint32_t count);
 	static void end(void);
 };
 

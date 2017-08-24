@@ -80,6 +80,19 @@ float FreqMeasureClass::countToFrequency(uint32_t count)
 #endif
 }
 
+float FreqMeasureClass::countToNanoseconds(uint32_t count)
+{
+#if defined(__AVR__)
+	return (float)count * (1000000000.0f / (float)F_CPU);
+#elif defined(__arm__) && defined(TEENSYDUINO) && defined(KINETISK)
+	return (float)count * (1000000000.0f / (float)F_BUS);
+#elif defined(__arm__) && defined(TEENSYDUINO) && defined(KINETISL)
+	return (float)count * (2000000000.0f / (float)F_PLL);
+#else
+	return 0.0;
+#endif
+}
+
 void FreqMeasureClass::end(void)
 {
 	capture_shutdown();
