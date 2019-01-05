@@ -77,6 +77,8 @@ float FreqMeasureClass::countToFrequency(uint32_t count)
 	return (float)F_BUS / (float)count;
 #elif defined(__arm__) && defined(TEENSYDUINO) && defined(KINETISL)
 	return (float)(F_PLL/2) / (float)count;
+#elif defined(__arm__) && defined(TEENSYDUINO) && (defined(__IMXRT1052__) || defined(__IMXRT1062__))
+	return (float)F_BUS_ACTUAL / (float)count;
 #endif
 }
 
@@ -88,6 +90,8 @@ float FreqMeasureClass::countToNanoseconds(uint32_t count)
 	return (float)count * (1000000000.0f / (float)F_BUS);
 #elif defined(__arm__) && defined(TEENSYDUINO) && defined(KINETISL)
 	return (float)count * (2000000000.0f / (float)F_PLL);
+#elif defined(__arm__) && defined(TEENSYDUINO) && (defined(__IMXRT1052__) || defined(__IMXRT1062__))
+	return (float)count * 1000000000.0f / (float)F_BUS_ACTUAL;
 #else
 	return 0.0;
 #endif
