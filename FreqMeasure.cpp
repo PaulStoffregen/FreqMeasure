@@ -139,7 +139,12 @@ ISR(TIMER_CAPTURE_VECTOR)
     if (cptPeriod == nbPeriod) {		     //MOD TG 20 april 2018
 	// compute the waveform period
 		capture = ((uint32_t)capture_msw << 16) | capture_lsw;
-		period = capture - capture_previous;
+		if (capture < capture_previous) {
+			period = 2^32 - capture_previous ;
+			period += capture;
+		} else {
+			period = capture - capture_previous;
+		}
 		capture_previous = capture;
 		cptPeriod = 0;
 
@@ -196,7 +201,12 @@ void FTM_ISR_NAME (void)
 				capture |= ((capture_msw - 1) << 16);
 			}
 			// compute the waveform period
-			period = capture - capture_previous;
+			if (capture < capture_previous) {
+				period = 2^32 - capture_previous ;
+				period += capture;
+			} else {
+				period = capture - capture_previous;
+			}
 			capture_previous = capture;
 			cptPeriod = 0;
 
