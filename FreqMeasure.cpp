@@ -3,17 +3,17 @@
  * Copyright (c) 2011 PJRC.COM, LLC - Paul Stoffregen <paul@pjrc.com>
  *
  * Version 1.1
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,9 +33,15 @@ static volatile uint8_t buffer_tail;
 static uint16_t capture_msw;
 static uint32_t capture_previous;
 
+static volatile uint16_t nbPeriod = 1;
+static volatile uint16_t cptPeriod = 0;
 
-void FreqMeasureClass::begin(void)
+
+void FreqMeasureClass::begin(uint16_t nbAverage) //MOD TG 20 april 2018
 {
+	cptPeriod = 0; 		//MOD TG 20 april 2018 to count the number of averaged periods
+	nbPeriod = nbAverage;
+
 	capture_init();
 	capture_msw = 0;
 	capture_previous = 0;
@@ -126,10 +132,30 @@ ISR(TIMER_CAPTURE_VECTOR)
 		capture_overflow_reset();
 		capture_msw++;
 	}
+
+	if (capture_previous == 0) {			 //MOD TG 20 april 2018
+		capture_previous =  ((uint32_t)capture_msw << 16) | capture_lsw;
+		return;
+	}
+
+	cptPeriod++;                             //MOD TG 20 april 2018
+
+    if (cptPeriod == nbPeriod) {		     //MOD TG 20 april 2018
 	// compute the waveform period
-	capture = ((uint32_t)capture_msw << 16) | capture_lsw;
-	period = capture - capture_previous;
-	capture_previous = capture;
+		capture = ((uint32_t)capture_msw << 16) | capture_lsw;
+		if (capture < capture_previous) {
+			period = 2^32 - capture_previous ;
+			period += capture;
+		} else {
+			period = capture - capture_previous;
+		}
+		capture_previous = capture;
+		cptPeriod = 0;
+
+ 	} else {
+		return;								//MOD TG 20 april 2018
+	}
+
 	// store it into the buffer
 	i = buffer_head + 1;
 	if (i >= FREQMEASURE_BUFFER_LEN) i = 0;
@@ -151,16 +177,47 @@ void FTM_ISR_NAME (void)
 		capture_msw++;
 		inc = true;
 	}
+
+
 	if (capture_event()) {
+
 		capture = capture_read();
-		if (capture <= 0xE000 || !inc) {
-			capture |= (capture_msw << 16);
-		} else {
-			capture |= ((capture_msw - 1) << 16);
+
+		if (capture_previous ==0) {				//MOD TG 20 april 2018
+
+			if (capture <= 0xE000 || !inc) {
+				capture_previous |= (capture_msw << 16);
+			} else {
+				capture_previous |= ((capture_msw - 1) << 16);
+			}
+
+			return;
 		}
+
+		cptPeriod++;                             //MOD TG 20 april 2018
+
+    	if (cptPeriod == nbPeriod) {		     //MOD TG 20 april 2018
 		// compute the waveform period
-		period = capture - capture_previous;
-		capture_previous = capture;
+
+			if (capture <= 0xE000 || !inc) {
+				capture |= (capture_msw << 16);
+			} else {
+				capture |= ((capture_msw - 1) << 16);
+			}
+			// compute the waveform period
+			if (capture < capture_previous) {
+				period = 2^32 - capture_previous ;
+				period += capture;
+			} else {
+				period = capture - capture_previous;
+			}
+			capture_previous = capture;
+			cptPeriod = 0;
+
+ 		} else {
+			return;								//MOD TG 20 april 2018
+		}
+
 		// store it into the buffer
 		i = buffer_head + 1;
 		if (i >= FREQMEASURE_BUFFER_LEN) i = 0;

@@ -8,10 +8,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -430,7 +430,7 @@ static inline void capture_shutdown(void)
 
 
 #define TIMER_OVERFLOW_VECTOR  TIMER1_OVF_vect
-#define TIMER_CAPTURE_VECTOR   TIMER1_CAPT_vect 
+#define TIMER_CAPTURE_VECTOR   TIMER1_CAPT_vect
 
 
 #elif defined(CAPTURE_USE_TIMER3)
@@ -472,7 +472,7 @@ static inline void capture_shutdown(void)
 }
 
 #define TIMER_OVERFLOW_VECTOR  TIMER3_OVF_vect
-#define TIMER_CAPTURE_VECTOR   TIMER3_CAPT_vect 
+#define TIMER_CAPTURE_VECTOR   TIMER3_CAPT_vect
 
 
 
@@ -515,7 +515,7 @@ static inline void capture_shutdown(void)
 }
 
 #define TIMER_OVERFLOW_VECTOR  TIMER4_OVF_vect
-#define TIMER_CAPTURE_VECTOR   TIMER4_CAPT_vect 
+#define TIMER_CAPTURE_VECTOR   TIMER4_CAPT_vect
 
 
 
@@ -558,7 +558,7 @@ static inline void capture_shutdown(void)
 }
 
 #define TIMER_OVERFLOW_VECTOR  TIMER5_OVF_vect
-#define TIMER_CAPTURE_VECTOR   TIMER5_CAPT_vect 
+#define TIMER_CAPTURE_VECTOR   TIMER5_CAPT_vect
 
 
 
